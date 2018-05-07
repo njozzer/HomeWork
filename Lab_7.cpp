@@ -1,42 +1,41 @@
 #include<iostream>
-
-
-int *read_file(char *address, size_t *len) {
-    FILE *f_in;
-    int *arr = 0;
-    f_in = fopen(address, "r");
-    if (f_in != 0) {
-        fscanf(f_in, "%d", len);
-        size_t i = 0;
-        arr = (int *) calloc(*len, sizeof(int));
-        while (i < *len) {
-            fscanf(f_in, "%d", &arr[i]);
-            i++;
-        }
-        fclose(f_in);
-    }
-    return arr;
-}
-
+using std::string;
 struct Serial {
     Serial *next;
-    char *name;
-    char *producer;
+    string name;
+    string producer;
     int count_seasons;
     double popularity;
     double rating;
-    char *date;
-    char *country;
+    string date;
+    string country;
 };
+
+void InitSerial(Serial *serial,
+                string name,
+                string producer,
+                int count_seasons,
+                double popularity,
+                double rating,
+                string date,
+                string country) {
+    serial = (Serial *) malloc(sizeof(Serial));
+    serial->name = name;
+    serial->producer = producer;
+    serial->count_seasons = count_seasons;
+    serial->popularity = popularity;
+    serial->rating = rating;
+    serial->date = date;
+    serial->country = country;
+}
 
 struct SerialList {
     Serial *first;
-public:
-    SerialList() {
-        this->first = nullptr;
-    }
-
 };
+
+void InitList(SerialList *list) {
+    list->first = NULL;
+}
 
 void remove(SerialList *lst, Serial *serial) {
     Serial *curr = lst->first;
@@ -58,37 +57,73 @@ void insert(SerialList *lst, Serial *serial, int order) {
 }
 
 void add(SerialList *lst, Serial *serial) {
+
     Serial *curr = lst->first;
-    while (curr != NULL) {
-        curr = curr->next;
+    if (curr == NULL) {
+        lst->first = serial;
+    } else {
+        while (curr != NULL) {
+            curr = curr->next;
+        }
+        curr->next = serial;
     }
-    curr->next = serial;
-}
-
-Serial *filter(SerialList) {
 
 }
-Serial *find(SerialList *lst, char *producer) {
+
+/*
+ * param:
+ * 1 is >
+ * 0 is ==
+ * -1 is <
+ * */
+SerialList *filter(SerialList *lst, double popularity, int param) {
+    SerialList *f_lst;
+    Serial *curr = lst->first;
+    switch (param) {
+        case -1: {
+            while (curr != NULL) {
+                if (curr->popularity < popularity) {
+                    add(f_lst, curr);
+                }
+                curr = curr->next;
+            }
+            break;
+        }
+        case 0: {
+            while (curr != NULL) {
+                if (curr->popularity == popularity) {
+                    add(f_lst, curr);
+                }
+                curr = curr->next;
+            }
+            break;
+        }
+        case 1: {
+            while (curr != NULL) {
+                if (curr->popularity > popularity) {
+                    add(f_lst, curr);
+                }
+                curr = curr->next;
+            }
+            break;
+        }
+    }
+    return f_lst;
+}
+
+SerialList *find(SerialList *lst, string producer) {
+    SerialList *f_lst;
     Serial *curr = lst->first;
 
     while (curr->next != NULL) {
         if (curr->producer == producer) {
-            
+            add(f_lst, curr);
         }
         curr = curr->next;
     }
-    return curr;
+    return f_lst;
 }
-/*
- *  Serial *next;
- *   char *name;
- *   char *producer;
- *   int count_seasons;
- *   double popularity;
- *   double rating;
- *   char *date;
- *   char *country;
- */
+
 int save(char *address, SerialList *lst) {
     FILE *f_out;
     f_out = fopen(address, "w");
@@ -117,15 +152,17 @@ SerialList *load(char *address) {
     f_in = fopen(address, "r");
     SerialList *lst;
     if (f_in != 0) {
+
         fclose(f_in);
     }
 }
 
 int main() {
-    int n = 0;
-    while (n++ < 10) {
-        std::cout << n;
-    }
+    SerialList lst;
+    InitList(&lst);
+    Serial *serial;
+    InitSerial(serial, "Name", "Producer", 4, 4.4, 5, "07.06.2011", "Ru");
+    add(&lst, serial);
     return 0;
 }
 
