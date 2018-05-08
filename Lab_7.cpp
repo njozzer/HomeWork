@@ -1,6 +1,7 @@
 #include<iostream>
 
 using std::string;
+const char *file = "/home/njozzer/CLionProjects/untitled15/data.txt";
 struct Serial {
     Serial *next;
     string name;
@@ -39,10 +40,14 @@ void InitList(SerialList *list) {
 
 void remove(SerialList *lst, Serial *serial) {
     Serial *curr = lst->first;
-    while (curr != serial) {
-        curr = curr->next;
+    if (curr == serial) {
+        lst->first = serial->next;
+    } else {
+        while (curr->next != serial) {
+            curr = curr->next;
+        }
+        curr->next = serial->next;
     }
-    curr->next = serial->next;
     delete serial;
 }
 
@@ -70,58 +75,65 @@ void add(SerialList *lst, Serial *serial) {
 
 }
 
+Serial *copy(Serial *target) {
+    Serial *serial;
+    serial = (Serial *) malloc(sizeof(Serial));
+    InitSerial(serial,
+               target->name,
+               target->producer,
+               target->count_seasons,
+               target->popularity,
+               target->rating,
+               target->date,
+               target->country);
+    return serial;
+}
+
 /*
  * param:
  * 1 is >
  * 0 is ==
  * -1 is <
  * */
-void filter(SerialList *lst,SerialList *f_lst, double popularity, int param) {
+void filter(SerialList *lst, SerialList *f_lst, double popularity, int param) {
     Serial *curr = lst->first;
-    add(f_lst,curr);
-   /* if (param == -1) {
+    if (param == -1) {
         while (curr != NULL) {
             if (curr->popularity < popularity) {
-                add(f_lst, curr);
+                add(f_lst, copy(curr));
             }
             curr = curr->next;
         }
-
     }
     if (param == 0) {
         while (curr != NULL) {
             if (curr->popularity == popularity) {
-                add(f_lst, curr);
+                add(f_lst, copy(curr));
             }
             curr = curr->next;
         }
-
     }
     if (param == 1) {
         while (curr != NULL) {
             if (curr->popularity > popularity) {
-                add(f_lst, curr);
+                add(f_lst, copy(curr));
             }
             curr = curr->next;
         }
-    }*/
-
+    }
 }
 
-SerialList find(SerialList *lst, string producer) {
-    SerialList f_lst;
+void find(SerialList *lst, SerialList *f_lst, string producer) {
     Serial *curr = lst->first;
-
-    while (curr->next != NULL) {
+    while (curr != NULL) {
         if (curr->producer == producer) {
-            add(&f_lst, curr);
+            add(f_lst, copy(curr));
         }
         curr = curr->next;
     }
-    return f_lst;
 }
 
-int save(char *address, SerialList *lst) {
+int save(const char *address, SerialList *lst) {
     FILE *f_out;
     f_out = fopen(address, "w");
     if (f_out != 0) {
@@ -144,16 +156,36 @@ int save(char *address, SerialList *lst) {
     return 0;
 }
 
-SerialList *load(char *address) {
+SerialList load(const char *address) {
+    SerialList list;
+    InitList(&list);
     FILE *f_in;
     f_in = fopen(address, "r");
-    SerialList *lst=nullptr;
-    InitList(lst);
     if (f_in != 0) {
 
+        char name[20];
+        char producer[20];
+        int count_seasons;
+        double popularity;
+        double rating;
+        char date[20];
+        char country[40];
+        while (fscanf(f_in, "%s %s %d %lf %lf %s %s",
+                      name,
+                      producer,
+                      &count_seasons,
+                      &popularity,
+                      &rating,
+                      date,
+                      country) != EOF) {
+            Serial *serial = (Serial *) malloc(sizeof(Serial));
+            InitSerial(serial, name, producer, count_seasons, popularity, rating, date, country);
+            add(&list, serial);
+        }
         fclose(f_in);
     }
-    return lst;
+
+    return list;
 }
 
 /*
@@ -168,20 +200,29 @@ SerialList *load(char *address) {
 int main() {
     SerialList lst;
     InitList(&lst);
-    Serial *serial = (Serial *) malloc(sizeof(Serial));
     Serial *serial1 = (Serial *) malloc(sizeof(Serial));
+    Serial *serial2 = (Serial *) malloc(sizeof(Serial));
     Serial *serial3 = (Serial *) malloc(sizeof(Serial));
     Serial *serial4 = (Serial *) malloc(sizeof(Serial));
-    InitSerial(serial, "Name", "Producer", 4, 4.6, 5, "07.06.2011", "Ru");
     InitSerial(serial1, "Name", "Producer", 4, 4.6, 5, "07.06.2011", "Ru");
-    InitSerial(serial4, "Name", "Producer", 4, 4.2, 5, "07.06.2011", "Ru");
-    InitSerial(serial3, "Name", "Producer", 4, 4.8, 5, "07.06.2011", "Ru");
-    add(&lst, serial);
+    InitSerial(serial2, "Name", "Producer", 4, 4.6, 5, "07.06.2011", "Ru");
+    InitSerial(serial3, "Name", "Producer", 4, 4.2, 5, "07.06.2011", "Ru");
+    InitSerial(serial4, "Name", "Producer", 4, 4.8, 5, "07.06.2011", "Ru");
     add(&lst, serial1);
-    add(&lst, serial3);
+    add(&lst, serial2);
+    insert(&lst, serial3, 1);
     add(&lst, serial4);
+
     SerialList f_lst;
     InitList(&f_lst);
-    filter(&lst,&f_lst,4.8,-1);
+    find(&lst, &f_lst, "Producer");
+
+
+    SerialList list = load(file);
+    Serial *curr = list.first;
+    while (curr != NULL) {
+        std::cout << curr->popularity << " " << curr->producer << std::endl;
+        curr = curr->next;
+    }
     return 0;
 }
