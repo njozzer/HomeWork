@@ -78,7 +78,8 @@ void add(SerialList *lst, Serial *serial) {
  * */
 void filter(SerialList *lst,SerialList *f_lst, double popularity, int param) {
     Serial *curr = lst->first;
-    if (param == -1) {
+    add(f_lst,curr);
+   /* if (param == -1) {
         while (curr != NULL) {
             if (curr->popularity < popularity) {
                 add(f_lst, curr);
@@ -103,7 +104,8 @@ void filter(SerialList *lst,SerialList *f_lst, double popularity, int param) {
             }
             curr = curr->next;
         }
-    }
+    }*/
+
 }
 
 SerialList find(SerialList *lst, string producer) {
@@ -126,13 +128,13 @@ int save(char *address, SerialList *lst) {
         Serial *current = lst->first;
         while (current != NULL) {
             fprintf(f_out, "%s %s %d %lf %lf %s %s\n",
-                    current->name,
-                    current->producer,
+                    current->name.c_str(),
+                    current->producer.c_str(),
                     current->count_seasons,
                     current->popularity,
                     current->rating,
-                    current->date,
-                    current->country
+                    current->date.c_str(),
+                    current->country.c_str()
             );
             current = current->next;
         }
@@ -145,11 +147,13 @@ int save(char *address, SerialList *lst) {
 SerialList *load(char *address) {
     FILE *f_in;
     f_in = fopen(address, "r");
-    SerialList *lst;
+    SerialList *lst=nullptr;
+    InitList(lst);
     if (f_in != 0) {
 
         fclose(f_in);
     }
+    return lst;
 }
 
 /*
