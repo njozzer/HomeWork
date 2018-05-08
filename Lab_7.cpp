@@ -1,4 +1,5 @@
 #include<iostream>
+
 using std::string;
 struct Serial {
     Serial *next;
@@ -19,7 +20,6 @@ void InitSerial(Serial *serial,
                 double rating,
                 string date,
                 string country) {
-    serial = (Serial *) malloc(sizeof(Serial));
     serial->name = name;
     serial->producer = producer;
     serial->count_seasons = count_seasons;
@@ -62,7 +62,7 @@ void add(SerialList *lst, Serial *serial) {
     if (curr == NULL) {
         lst->first = serial;
     } else {
-        while (curr != NULL) {
+        while (curr->next != NULL) {
             curr = curr->next;
         }
         curr->next = serial;
@@ -76,48 +76,43 @@ void add(SerialList *lst, Serial *serial) {
  * 0 is ==
  * -1 is <
  * */
-SerialList *filter(SerialList *lst, double popularity, int param) {
-    SerialList *f_lst;
+void filter(SerialList *lst,SerialList *f_lst, double popularity, int param) {
     Serial *curr = lst->first;
-    switch (param) {
-        case -1: {
-            while (curr != NULL) {
-                if (curr->popularity < popularity) {
-                    add(f_lst, curr);
-                }
-                curr = curr->next;
+    if (param == -1) {
+        while (curr != NULL) {
+            if (curr->popularity < popularity) {
+                add(f_lst, curr);
             }
-            break;
+            curr = curr->next;
         }
-        case 0: {
-            while (curr != NULL) {
-                if (curr->popularity == popularity) {
-                    add(f_lst, curr);
-                }
-                curr = curr->next;
+
+    }
+    if (param == 0) {
+        while (curr != NULL) {
+            if (curr->popularity == popularity) {
+                add(f_lst, curr);
             }
-            break;
+            curr = curr->next;
         }
-        case 1: {
-            while (curr != NULL) {
-                if (curr->popularity > popularity) {
-                    add(f_lst, curr);
-                }
-                curr = curr->next;
+
+    }
+    if (param == 1) {
+        while (curr != NULL) {
+            if (curr->popularity > popularity) {
+                add(f_lst, curr);
             }
-            break;
+            curr = curr->next;
         }
     }
-    return f_lst;
 }
 
-SerialList *find(SerialList *lst, string producer) {
-    SerialList *f_lst;
+SerialList find(SerialList *lst, string producer) {
+    SerialList f_lst;
     Serial *curr = lst->first;
 
     while (curr->next != NULL) {
         if (curr->producer == producer) {
-            add(f_lst, curr);
+            add(&f_lst, curr);
         }
         curr = curr->next;
     }
@@ -157,12 +152,32 @@ SerialList *load(char *address) {
     }
 }
 
+/*
+ *string name;
+ *string producer;
+ *int count_seasons;
+ *double popularity;
+ *double rating;
+ *string date;
+ *string country;
+*/
 int main() {
     SerialList lst;
     InitList(&lst);
-    Serial *serial;
-    InitSerial(serial, "Name", "Producer", 4, 4.4, 5, "07.06.2011", "Ru");
+    Serial *serial = (Serial *) malloc(sizeof(Serial));
+    Serial *serial1 = (Serial *) malloc(sizeof(Serial));
+    Serial *serial3 = (Serial *) malloc(sizeof(Serial));
+    Serial *serial4 = (Serial *) malloc(sizeof(Serial));
+    InitSerial(serial, "Name", "Producer", 4, 4.6, 5, "07.06.2011", "Ru");
+    InitSerial(serial1, "Name", "Producer", 4, 4.6, 5, "07.06.2011", "Ru");
+    InitSerial(serial4, "Name", "Producer", 4, 4.2, 5, "07.06.2011", "Ru");
+    InitSerial(serial3, "Name", "Producer", 4, 4.8, 5, "07.06.2011", "Ru");
     add(&lst, serial);
+    add(&lst, serial1);
+    add(&lst, serial3);
+    add(&lst, serial4);
+    SerialList f_lst;
+    InitList(&f_lst);
+    filter(&lst,&f_lst,4.8,-1);
     return 0;
 }
-
