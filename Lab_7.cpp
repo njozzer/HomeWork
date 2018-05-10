@@ -1,4 +1,6 @@
 #include<iostream>
+#include <stdlib.h>
+#include <stdio.h>
 
 using std::string;
 const char *file = "/home/njozzer/CLionProjects/untitled15/data.txt";
@@ -11,6 +13,7 @@ struct Serial {
     double rating;
     string date;
     string country;
+
 };
 
 void InitSerial(Serial *serial,
@@ -216,7 +219,6 @@ int main() {
     SerialList f_lst;
     InitList(&f_lst);
     find(&lst, &f_lst, "Producer");
-
 
     SerialList list = load(file);
     Serial *curr = list.first;
