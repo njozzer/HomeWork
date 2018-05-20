@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <cstring>
 const char *file = "/home/njozzer/CLionProjects/untitled22/data.txt";
 
 int max(int a, int b) {
@@ -59,7 +59,7 @@ void InitNode(Node *B,
     B->has_ios = has_ios;
     B->is_free = is_free;
     B->is_open_source = is_open_source;
-    B->cost - cost;
+    B->cost = cost;
     B->Left = NULL;
     B->Right = NULL;
     B->Parent = NULL;
@@ -399,5 +399,6 @@ int main() {
     InitTree(&ftree);
     filter(tree.root, &ftree, 0);
     PreOrder(ftree.root, f_ptr);
+
     return 0;
 }
