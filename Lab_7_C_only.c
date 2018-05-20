@@ -24,6 +24,7 @@ void InitSerial(Serial *serial,
                 double rating,
                 char date[32],
                 char country[32]) {
+    serial->next = NULL;
     strcpy(serial->name, name);
     strcpy(serial->producer, producer);
     serial->count_seasons = count_seasons;
@@ -51,14 +52,31 @@ void remove1(SerialList *lst, Serial *serial) {
         }
         curr->next = serial->next;
     }
+    free(serial);
+}
 
+void print(SerialList *lst) {
+    Serial *curr = lst->first;
+    while (curr != NULL) {
+        printf("%1.2lf %s\n", curr->popularity, curr->producer);
+        curr = curr->next;
+    }
 }
 
 void insert(SerialList *lst, Serial *serial, int order) {
     int n = 0;
     Serial *curr = lst->first;
+    if (curr == NULL) {
+        lst->first = serial;
+        return;
+    }
     while (n++ < order - 1) {
-        curr = curr->next;
+        if (curr->next != NULL)
+            curr = curr->next;
+        else if (curr->next == NULL) {
+            curr->next = serial;
+            return;
+        }
     }
     serial->next = curr->next;
     curr->next = serial;
@@ -207,25 +225,17 @@ int main() {
     Serial *serial2 = (Serial *) malloc(sizeof(Serial));
     Serial *serial3 = (Serial *) malloc(sizeof(Serial));
     Serial *serial4 = (Serial *) malloc(sizeof(Serial));
-    InitSerial(serial1, "Name", "Producer", 4, 4.6, 5, "07.06.2011", "Ru");
-    InitSerial(serial2, "Name", "Producer", 4, 4.6, 5, "07.06.2011", "Ru");
-    InitSerial(serial3, "Name", "Producer", 4, 4.2, 5, "07.06.2011", "Ru");
-    InitSerial(serial4, "Name", "Producer", 4, 4.8, 5, "07.06.2011", "Ru");
+    InitSerial(serial1, "Name", "Producer1", 4, 4.6, 5, "07.06.2011", "Ru");
+    InitSerial(serial2, "Name", "Producer2", 4, 4.6, 5, "07.06.2011", "Ru");
+    InitSerial(serial3, "Name", "Producer3", 4, 4.2, 5, "07.06.2011", "Ru");
+    InitSerial(serial4, "Name", "Producer4", 4, 4.8, 5, "07.06.2011", "Ru");
     add(&lst, serial1);
     add(&lst, serial2);
     insert(&lst, serial3, 1);
     add(&lst, serial4);
-
-    SerialList f_lst;
-    InitList(&f_lst);
-    find(&lst, &f_lst, "Producer");
-
-
-    SerialList list = load(file);
-    Serial *curr = list.first;
-    while (curr != NULL) {
-        printf("%1.2lf %s\n", curr->popularity, curr->producer);
-        curr = curr->next;
-    }
+    SerialList flst;
+    InitList(&flst);
+    filter(&lst, &flst, 4.7, -1);
+    print(&flst);
     return 0;
 }
