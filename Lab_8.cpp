@@ -1,8 +1,8 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cstring>
-#include <cstdio>
-#include <stdlib.h>
+
+const char *file = "/home/njozzer/CLionProjects/untitled22/data.txt";
 
 int max(int a, int b) {
     return a > b ? a : b;
@@ -16,60 +16,81 @@ int StringStartsWith(char TestArray[80], char StringToFind[80], int count) {
     return 1;
 }
 
-struct BookNode {
+typedef struct Node {
     char name[80];
-    char author[80];
-
+    char version[80];
+    char lisence[80];
+    unsigned int has_android:1;
+    unsigned int has_ios:1;
+    unsigned int is_free:1;
+    unsigned int is_open_source:1;
+    double cost;
+    char developer[80];
+    char code_language[80];
     int balance;
-    int height;
+    unsigned int height;
+    struct Node *Left;
+    struct Node *Right;
+    struct Node *Parent;
+} Node;
+typedef struct AVL_Tree {
+    Node *root;
+} AVL_Tree;
 
-    BookNode *Left;
-    BookNode *Right;
-    BookNode *Parent;
-};
+void InitNode(Node *B,
+              char name[80],
+              char version[80],
+              char lisence[80],
+              unsigned int has_android,
+              unsigned int has_ios,
+              unsigned int is_free,
+              unsigned int is_open_source,
+              double cost,
+              char developer[80],
+              char code_language[80]) {
 
-void InitNode(BookNode *B) {
+    strcpy(B->name, name);
+    strcpy(B->version, version);
+    strcpy(B->developer, developer);
+    strcpy(B->lisence, lisence);
+    strcpy(B->developer, developer);
+    strcpy(B->code_language, code_language);
+    B->has_android = has_android;
+    B->has_ios = has_ios;
+    B->is_free = is_free;
+    B->is_open_source = is_open_source;
+    B->cost - cost;
     B->Left = NULL;
     B->Right = NULL;
     B->Parent = NULL;
-
     B->height = 0;
 }
 
-void print(BookNode *B) {
-    if (B != NULL)
-        printf("\nName: %s\nAuthor: %s", B->name, B->author);
+void InitTree(AVL_Tree *T) {
+    T->root = NULL;
 }
 
-struct BookTree {
-    BookNode *Root;
-};
+Node *Balance(Node *p);
 
-void InitTree(BookTree *T) {
-    T->Root = NULL;
-}
+void FixHeight(Node *p);
 
-BookNode *Balance(BookNode *p);
+void Add_R(AVL_Tree *T, Node *N, Node *Current);
 
-void FixHeight(BookNode *p);
+int bfactor(Node *p);
 
-void Add_R(BookTree *T, BookNode *N, BookNode *Current);
+Node *RotateLeft(Node *q);
 
-int bfactor(BookNode *p);
+Node *RotateRight(Node *p);
 
-BookNode *RotateLeft(BookNode *q);
-
-BookNode *RotateRight(BookNode *p);
-
-void Add_R(BookTree *T, BookNode *N, BookNode *Current = NULL) {
+void Add_R(AVL_Tree *T, Node *N, Node *Current = NULL) {
     if (T == NULL) return;
-    if (T->Root == NULL) {
-        T->Root = N;
-        T->Root->balance = 0;
+    if (T->root == NULL) {
+        T->root = N;
+        T->root->balance = 0;
         return;
     }
     if (Current == NULL)
-        Current = T->Root;
+        Current = T->root;
     int c = strcmp(Current->name, N->name);
     if (c < 0) {
         if (Current->Left != NULL)
@@ -96,20 +117,20 @@ void Add_R(BookTree *T, BookNode *N, BookNode *Current = NULL) {
     return;
 }
 
-int bfactor(BookNode *p) {
+int bfactor(Node *p) {
     int hr = (p->Right == NULL) ? 0 : p->Right->height;
     int hl = (p->Left == NULL) ? 0 : p->Left->height;
     return hr - hl;
 }
 
-void FixHeight(BookNode *p) {
+void FixHeight(Node *p) {
     int hr = (p->Right == NULL) ? 0 : p->Right->height;
     int hl = (p->Left == NULL) ? 0 : p->Left->height;
     p->height = max(hr, hl) + 1;
 }
 
-BookNode *RotateLeft(BookNode *q) {
-    BookNode *p = q->Right;
+Node *RotateLeft(Node *q) {
+    Node *p = q->Right;
     q->Right = p->Left;
     p->Left = q;
     FixHeight(q);
@@ -117,8 +138,8 @@ BookNode *RotateLeft(BookNode *q) {
     return p;
 }
 
-BookNode *RotateRight(BookNode *p) {
-    BookNode *q = p->Left;
+Node *RotateRight(Node *p) {
+    Node *q = p->Left;
     p->Left = q->Right;
     q->Right = p;
     FixHeight(p);
@@ -126,7 +147,7 @@ BookNode *RotateRight(BookNode *p) {
     return q;
 }
 
-BookNode *Balance(BookNode *p) {
+Node *Balance(Node *p) {
     FixHeight(p);
     if (bfactor(p) >= 2) {
         p->Right = RotateLeft(p->Right);
@@ -139,12 +160,11 @@ BookNode *Balance(BookNode *p) {
     return p;
 }
 
+void Remove(AVL_Tree *T, char BookName[]) {}
 
-void Remove(BookTree *T, char BookName[]) {}
-
-BookNode *Find_R(BookTree *T, char BookName[], BookNode *Current = NULL) {
+Node *Find_R(AVL_Tree *T, char BookName[], Node *Current = NULL) {
     if (T == NULL) return NULL;
-    if (Current == NULL) Current = T->Root;
+    if (Current == NULL) Current = T->root;
     int c = strcmp(Current->name, BookName);
     if (c == -1) {
         if (Current->Left != NULL) return Find_R(T, BookName, Current->Left);
@@ -159,50 +179,53 @@ BookNode *Find_R(BookTree *T, char BookName[], BookNode *Current = NULL) {
     return NULL;
 }
 
-
-void MakeAction(BookNode *Node, void (*f)(BookNode *)) {
-    if (Node != NULL)
-        f(Node);
-    if (Node->Left != NULL)
-        MakeAction(Node->Left, f);
-    if (Node->Right != NULL)
-        MakeAction(Node->Right, f);
-}
-
-void Load(BookTree *T, char FileName[]) {
+void Load(AVL_Tree *T, const char *file) {
     if (T == NULL) return;
     FILE *fp;
-    fp = fopen(FileName, "r");
+    fp = fopen(file, "r");
     if (fp == NULL) {
-        printf("\nCouldn't open the file: %s", FileName);
+        printf("\nCouldn't open the file: %s", file);
         return;
     }
-    char Name[80];
-    char Author[80];
-    while (1) {
-        //fscanf(fp, "%s%s", Name, Author);
-        fgets(Name, 80, fp);
-        fgets(Author, 80, fp);
-        //if(strcmp(Name, "NULL")!=0 && strcmp(Author, "NULL")!=0)
-        if (!StringStartsWith(Name, "NULL", 4) && !StringStartsWith(Author, "NULL", 4)) {
-            BookNode *N = (BookNode *) malloc(sizeof(BookNode));
-            InitNode(N);
-            strcpy(N->author, Author);
-            strcpy(N->name, Name);
-            Add_R(T, N);
-        } else
-            break;
+    char name[80];
+    char version[80];
+    char lisence[80];
+    unsigned int has_android = 0;
+    unsigned int has_ios = 0;
+    unsigned int is_free = 0;
+    unsigned int is_open_source = 0;
+    double cost = 0;
+    char developer[80];
+    char code_language[80];
+
+    while (fscanf(fp, "%s %s %s %d %d %d %d %lf %s %s",
+                  name,
+                  version,
+                  lisence,
+                  &has_android,
+                  &has_ios,
+                  &is_free,
+                  &is_open_source,
+                  &cost,
+                  developer,
+                  code_language) != EOF) {
+        Node *N = (Node *) malloc(sizeof(Node));
+        printf("%s %s %s", N->name, N->version, N->lisence);
+        InitNode(N, name, version, lisence, has_android, has_ios, is_free, is_open_source, cost, developer,
+                 code_language);
+        Add_R(T, N);
     }
+
     fclose(fp);
 }
 
-void Add(BookTree *T, BookNode *N) {
+void Add(AVL_Tree *T, Node *N) {
     if (T == NULL) return;
-    if (T->Root == NULL) {
-        T->Root = N;
+    if (T->root == NULL) {
+        T->root = N;
         return;
     }
-    BookNode *Current = T->Root;
+    Node *Current = T->root;
     while (Current != NULL) {
         int c = strcmp(Current->name, N->name);
         if (c < 0) {
@@ -227,104 +250,154 @@ void Add(BookTree *T, BookNode *N) {
     }
 }
 
-void SaveNode(BookNode *Node, FILE *fp) {
+void SaveNode(Node *node, FILE *fp) {
     if (fp == NULL)
         return;
-    if (Node != NULL) {
-        //fprintf(fp, "%s%s", Node->name, Node->author);
-        fputs(Node->name, fp);
-        fputs("\n", fp);
-        fputs(Node->author, fp);
-        fputs("\n", fp);
-        if (Node->Left != NULL)
-            SaveNode(Node->Left, fp);
-        if (Node->Right != NULL)
-            SaveNode(Node->Right, fp);
+    if (node != NULL) {
+        fprintf(fp, "%s %s %s %d %d %d %d %lf %s %s\n",
+                node->name,
+                node->version,
+                node->lisence,
+                node->has_android,
+                node->has_ios,
+                node->is_free,
+                node->is_open_source,
+                node->cost,
+                node->developer,
+                node->code_language);
+        if (node->Left != NULL)
+            SaveNode(node->Left, fp);
+        if (node->Right != NULL)
+            SaveNode(node->Right, fp);
     }
 }
 
-void Save(BookTree *T, char FileName[]) {
+void Save(AVL_Tree *T, const char *file) {
     if (T == NULL) return;
     FILE *ptr;
-    ptr = fopen(FileName, "w");
+    ptr = fopen(file, "w");
     if (ptr == NULL) {
-        printf("\nCouldn't open the file: %s", FileName);
+        printf("\nCouldn't open the file: %s", file);
         return;
     }
-
-    SaveNode(T->Root, ptr);
-    fputs("NULL\n", ptr);
-    fputs("NULL", ptr);
+    SaveNode(T->root, ptr);
     fclose(ptr);
 }
 
-void PreOrder(BookNode *Node, void (*f)(BookNode *)) {
-    if (Node != NULL)
-        f(Node);
-    if (Node->Left != NULL)
-        PreOrder(Node->Left, f);
-    if (Node->Right != NULL)
-        PreOrder(Node->Right, f);
+void PreOrder(Node *node, void (*f)(Node *)) {
+    if (node != NULL)
+        f(node);
+    if (node->Left != NULL)
+        PreOrder(node->Left, f);
+    if (node->Right != NULL)
+        PreOrder(node->Right, f);
 }
 
-void InOrder(BookNode *Node, void (*f)(BookNode *)) {
-    if (Node->Left != NULL)
-        InOrder(Node->Left, f);
-    if (Node != NULL)
-        f(Node);
-    if (Node->Right != NULL)
-        InOrder(Node->Right, f);
+void InOrder(Node *node, void (*f)(Node *)) {
+    if (node->Left != NULL)
+        InOrder(node->Left, f);
+    if (node != NULL)
+        f(node);
+    if (node->Right != NULL)
+        InOrder(node->Right, f);
 }
 
-void PostOrder(BookNode *Node, void (*f)(BookNode *)) {
-    if (Node->Left != NULL)
-        PostOrder(Node->Left, f);
-    if (Node->Right != NULL)
-        PostOrder(Node->Right, f);
-    if (Node != NULL)
-        f(Node);
+void PostOrder(Node *node, void (*f)(Node *)) {
+    if (node->Left != NULL)
+        PostOrder(node->Left, f);
+    if (node->Right != NULL)
+        PostOrder(node->Right, f);
+    if (node != NULL)
+        f(node);
+}
+
+void print(Node *B) {
+    if (B != NULL)
+        printf("\nName: %s\nDeveloper: %s \nVersion: %s\nIs_Free : %d\n*****",
+               B->name,
+               B->developer,
+               B->version,
+               B->is_free);
+}
+
+Node *find(AVL_Tree *tree, char name[80]) {
+    Node *curr = tree->root;
+    int cmp = strcmp(name, curr->name);
+    while (cmp != 0) {
+        if (cmp == -1) {
+            curr = curr->Left;
+            if (curr == NULL)
+                return curr;
+        } else if (cmp == 1) {
+            curr = curr->Right;
+            if (curr == NULL)
+                return curr;
+        }
+        cmp = strcmp(name, curr->name);
+
+    }
+    return curr;
+
+}
+
+Node *copy(Node *target) {
+    Node *node = (Node *) malloc(sizeof(Node));
+    InitNode(node,
+             target->name,
+             target->version,
+             target->lisence,
+             target->has_android,
+             target->has_ios,
+             target->is_free,
+             target->is_open_source,
+             target->cost,
+             target->developer,
+             target->code_language);
+    return node;
+}
+
+/**
+ *  param
+ *  1 = free
+ *  0 = not free
+ * */
+void *filter(Node *curr, AVL_Tree *ftree, int is_free) {
+    if (is_free == curr->is_free) {
+        Add_R(ftree, copy(curr));
+    }
+    if (is_free == curr->is_free) {
+        Add_R(ftree, curr);
+    }
+    if (curr->Left != NULL) {
+        filter(curr->Left, ftree, is_free);
+    }
+    if (curr->Right != NULL) {
+        filter(curr->Left, ftree, is_free);
+    }
 }
 
 int main() {
-    BookTree Tree;
-    InitTree(&Tree);
-    BookTree *ptr = &Tree;
-    BookNode *London = (BookNode *) malloc(sizeof(BookNode));
-    InitNode(London);
-    strcpy(London->author, "J.London");
-    strcpy(London->name, "Little Lady of the big house");
-    BookNode *T = (BookNode *) malloc(sizeof(BookNode));
-    InitNode(T);
-    strcpy(T->author, "L.Tolstoy");
-    strcpy(T->name, "War and Peace");
-    BookNode *S = (BookNode *) malloc(sizeof(BookNode));
-    InitNode(S);
-    strcpy(S->author, "M.Sholohov");
-    strcpy(S->name, "Calm Don");
-    BookNode *Scott = (BookNode *) malloc(sizeof(BookNode));
-    InitNode(Scott);
-    strcpy(Scott->author, "W.Scott");
-    strcpy(Scott->name, "Weverly");
-    BookNode *Dryzer = (BookNode *) malloc(sizeof(BookNode));
-    InitNode(Dryzer);
-    strcpy(Dryzer->author, "Dryzer");
-    strcpy(Dryzer->name, "American Tragedy");
-    Add_R(ptr, Scott);
-    Add_R(ptr, T);
-    Add_R(ptr, London);
-    Add_R(ptr, S);
-    Add_R(ptr, Dryzer);
-
-    printf("%d", bfactor(ptr->Root));
-    printf("\n-----\nPreorder:");
-    void (*f_ptr)(BookNode *);
+    AVL_Tree tree;
+    InitTree(&tree);
+    Node *node1 = (Node *) malloc(sizeof(Node));
+    Node *node2 = (Node *) malloc(sizeof(Node));
+    Node *node3 = (Node *) malloc(sizeof(Node));
+    Node *node4 = (Node *) malloc(sizeof(Node));
+    InitNode(node1, "Name1", "1.0", "lisence1", 1, 1, 0, 1, 390.0, "developer1", "Java");
+    InitNode(node2, "Name2", "0.7s", "lisence2", 0, 0, 1, 0, 540.0, "developer2", "C/C++");
+    InitNode(node3, "Name3", "3.4b", "lisence3", 1, 1, 0, 1, 564.0, "developer3", "C#");
+    InitNode(node4, "Name4", "0.1a", "lisence4", 1, 1, 0, 1, 490.0, "developer4", "Python3");
+    Add_R(&tree, node1);
+    Add_R(&tree, node2);
+    Add_R(&tree, node3);
+    Add_R(&tree, node4);
+    void (*f_ptr)(Node *);
     f_ptr = print;
-    PreOrder(Tree.Root, f_ptr);
-    printf("\n-----\nInorder:");
-    InOrder(Tree.Root, f_ptr);
-    printf("\n-----\nPostorder:");
-    PostOrder(Tree.Root, f_ptr);
-
+    printf("*****");
+    Save(&tree, file);
+    AVL_Tree ftree;
+    InitTree(&ftree);
+    filter(tree.root, &ftree, 0);
+    PreOrder(ftree.root, f_ptr);
     return 0;
 }
-
