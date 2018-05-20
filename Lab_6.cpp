@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <stdlib.h>
+#include <stdio.h>
 void fill_matrix(double **m, int l) {
     for (int i = 0; i < l; i++) {
         for (int j = 0; j < l; j++) {
@@ -29,8 +30,8 @@ double **edit(double **m, int l, int num) {
         for (int i = n; i < l; ++i) {
             k++;
         }
-        double arr1[k]{};
-        double arr2[k]{};
+        double *arr1=(double*)malloc(k* sizeof(double));
+        double *arr2=(double*)malloc(k* sizeof(double));
         for (int i = n; i < l; ++i) {
             arr1[i - n] = matrix[i][i - n];
             arr2[i - n] = matrix[i - n][i];
@@ -40,6 +41,8 @@ double **edit(double **m, int l, int num) {
             matrix[i - n][i] = arr2[(i - n + num) % k];
 
         }
+        free(arr1);
+        free(arr2);
         n++;
     }
     return matrix;
