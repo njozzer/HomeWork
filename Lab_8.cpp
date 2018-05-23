@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cstring>
-const char *file = "/home/njozzer/CLionProjects/untitled22/data.txt";
+const char *file = "/storage/emulated/0/AppProjects/MyNativeExecutable2/jni/data.txt";
 
 int max(int a, int b) {
     return a > b ? a : b;
@@ -159,8 +159,50 @@ Node *Balance(Node *p) {
     }
     return p;
 }
-
-void Remove(AVL_Tree *T, char BookName[]) {}
+Node* min(Node *curr){
+	return curr->Left?min(curr->Left):curr;
+}
+Node *getMin(Node *curr){
+	if(curr->Left==NULL){
+		return curr->Right;
+	}
+	curr->Left=getMin(curr->Left);
+	return Balance(curr);
+}
+Node* Remove(Node *curr, char name[80]) {
+	if(curr==NULL){
+		return NULL;
+	}
+	int c=strcmp(curr->name,name);
+	if(c==-1){
+		if(curr==NULL) 
+			return NULL;
+		else{
+			curr->Left=Remove(curr->Left,name);
+		}
+		
+	}
+	if(c==1){
+		if(curr==NULL) 
+			return NULL;
+		else{
+			curr->Right=Remove(curr->Right,name);
+		}
+	}
+	if(c==0){
+		Node *left=curr->Left;
+		Node *right=curr->Right;
+		if(right==NULL){
+			return left;
+		}
+		free(curr);
+		Node* Min=min(right);
+		Min->Right=getMin(right);
+		Min->Left=left;
+		return Balance(Min);
+	}
+	return Balance(curr);
+}
 
 Node *Find_R(AVL_Tree *T, char BookName[], Node *Current = NULL) {
     if (T == NULL) return NULL;
@@ -391,6 +433,7 @@ int main() {
     Add_R(&tree, node2);
     Add_R(&tree, node3);
     Add_R(&tree, node4);
+	tree.root=Remove(tree.root,node2->name);
     void (*f_ptr)(Node *);
     f_ptr = print;
     printf("*****");
@@ -398,7 +441,7 @@ int main() {
     AVL_Tree ftree;
     InitTree(&ftree);
     filter(tree.root, &ftree, 0);
-    PreOrder(ftree.root, f_ptr);
+    PreOrder(tree.root, f_ptr);
 
     return 0;
 }
